@@ -12,6 +12,8 @@ Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
 
 Route::get('/dashboard', [DashboardController::class, 'index']);
+Route::get('/dashboard/perawatan-data', [DashboardController::class, 'getPerawatanData'])
+    ->name('dashboard.perawatan-data');
 
 
 Route::resource('barang', BarangController::class);
