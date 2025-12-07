@@ -186,6 +186,14 @@ class MasterBarang extends Model
         return $items ? implode(' | ', $items) : null;
     }
 
+    public static function getBarangUntukPerawatan()
+    {
+        return self::select('id', 'nama_barang', 'merk', 'tipe', 'kondisi', 'keberadaan')
+            ->available()       // pakai scopeAvailable() yang sudah ada untuk skip soft-deleted
+            ->orderBy('nama_barang')
+            ->get();
+    }
+
     /**
      * Optional helper: hitung nilai_perolehan jika kosong (jumlah * harga_satuan)
      */
