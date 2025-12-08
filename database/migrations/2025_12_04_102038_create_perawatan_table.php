@@ -6,43 +6,40 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
-{
-    Schema::create('perawatan', function (Blueprint $table) {
-        $table->id();
-        
-        // ✅ UBAH MENJADI UUID
-        $table->uuid('barang_id');
-        
-        $table->string('jenis_perawatan');
-        $table->text('deskripsi');
-        $table->date('tanggal_perawatan');
-        $table->date('jadwal_perawatan_berikutnya')->nullable();
-        $table->string('teknisi')->nullable();
-        $table->string('vendor')->nullable();
-        $table->decimal('biaya', 15, 2)->nullable();
-        $table->enum('status', ['Selesai', 'Dalam proses', 'Terjadwal'])->default('Selesai');
-        $table->string('foto_sebelum')->nullable();
-        $table->string('foto_sesudah')->nullable();
-        $table->text('catatan')->nullable();
-        $table->timestamps();
+    {
+        Schema::create('perawatan', function (Blueprint $table) {
+            $table->id();
 
-        // ✅ SESUAIKAN DENGAN UUID
-        $table->foreign('barang_id')->references('id')->on('master_barang')->cascadeOnDelete();
-        
-        // ✅ TAMBAHKAN INDEX UNTUK PERFORMANCE
-        $table->index('barang_id');
-        $table->index('status');
-        $table->index('tanggal_perawatan');
-    });
-}
+            // gunakan UUID dan boleh nullable kalau perlu
+            $table->uuid('barang_id')->nullable();
 
-    /**
-     * Reverse the migrations.
-     */
+            $table->string('jenis_perawatan');
+            $table->text('deskripsi');
+            $table->date('tanggal_perawatan');
+            $table->date('jadwal_perawatan_berikutnya')->nullable();
+            $table->string('teknisi')->nullable();
+            $table->string('vendor')->nullable();
+            $table->decimal('biaya', 15, 2)->nullable();
+            $table->enum('status', ['Selesai', 'Dalam proses', 'Terjadwal'])->default('Selesai');
+            $table->string('foto_sebelum')->nullable();
+            $table->string('foto_sesudah')->nullable();
+            $table->text('catatan')->nullable();
+            $table->timestamps();
+
+            // foreign key untuk UUID — pastikan master_barang.id juga UUID/char(36)
+            $table->foreign('barang_id')
+                ->references('id')
+                ->on('master_barang')
+                ->nullOnDelete();
+
+            // index
+            $table->index('barang_id');
+            $table->index('status');
+            $table->index('tanggal_perawatan');
+        });
+    }
+
     public function down(): void
     {
         Schema::dropIfExists('perawatan');
