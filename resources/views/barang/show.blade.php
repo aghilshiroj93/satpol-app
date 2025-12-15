@@ -310,14 +310,25 @@
                             Kembali ke Daftar
                         </a>
 
-                        <button onclick="printDetail()"
+                        <!-- Tombol Cetak Berita Acara dengan link ke halaman terpisah -->
+                        <a href="{{ route('barang.cetak', $barang->id) }}" target="_blank"
                             class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition duration-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                             </svg>
-                            Cetak Detail
-                        </button>
+                            Cetak Berita Acara
+                        </a>
+
+                        <!-- Opsi: Tombol untuk print langsung tanpa preview -->
+                        <a href="{{ route('barang.print', $barang->id) }}" target="_blank"
+                            class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition duration-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            Print Langsung
+                        </a>
                     </div>
                 </div>
 
@@ -341,196 +352,4 @@
         </div>
 
     </div>
-
-    @push('scripts')
-        @php
-            use Carbon\Carbon;
-
-            $kodeAsetCetak =
-                $barang->kode_barang ??
-                $barang->kd_aset1 .
-                    '.' .
-                    $barang->kd_aset2 .
-                    '.' .
-                    $barang->kd_aset3 .
-                    '.' .
-                    $barang->kd_aset4 .
-                    '.' .
-                    $barang->kd_aset5;
-
-            $tanggalPerolehanCetak = $barang->tanggal_perolehan
-                ? Carbon::parse($barang->tanggal_perolehan)->format('d/m/Y')
-                : ($barang->tahun_perolehan
-                    ? Carbon::parse($barang->tahun_perolehan)->format('d/m/Y')
-                    : '-');
-
-            $hargaSatuanCetak = 'Rp ' . number_format($barang->harga_satuan ?? ($barang->harga ?? 0), 0, ',', '.');
-
-            $nilaiPerolehanCetak =
-                'Rp ' .
-                number_format(
-                    $barang->nilai_perolehan ??
-                        ($barang->harga_satuan ?? ($barang->harga ?? 0)) * ($barang->jumlah ?? 1),
-                    0,
-                    ',',
-                    '.',
-                );
-
-            $printData = [
-                'kodeAset' => $kodeAsetCetak,
-                'nibar' => $barang->nibar ?? '-',
-                'nama_barang' => $barang->nama_barang ?? '-',
-                'reg' => $barang->reg ?? '-',
-                'jumlah' => $barang->jumlah ?? 0,
-                'satuan' => $barang->satuan ?? 'Unit',
-                'merk_tipe' => trim(($barang->merk ?? '') . ' ' . ($barang->tipe ?? '')) ?: '-',
-                'lokasi' => $barang->lokasi ?? '-',
-                'nopol' => $barang->nopol ?? '-',
-                'nomor_rangka_bpkb' => ($barang->nomor_rangka ?? '-') . ' / ' . ($barang->nomor_bpkb ?? '-'),
-                'tanggal_perolehan' => $tanggalPerolehanCetak,
-                'cara_perolehan' => $barang->cara_perolehan ?? '-',
-                'harga_satuan' => $hargaSatuanCetak,
-                'nilai_perolehan' => $nilaiPerolehanCetak,
-                'kondisi' => $barang->kondisi ?? '-',
-                'keberadaan' => $barang->keberadaan ?? '-',
-                'pemegang' => $barang->pemegang ?? '-',
-                'status_penggunaan' => $barang->status_penggunaan ?? '-',
-                'keterangan' => $barang->keterangan ?? '-',
-            ];
-        @endphp
-
-        <script>
-            // data sudah di-encode aman oleh Blade
-            const printData = @json($printData);
-
-            function printDetail() {
-                const now = new Date();
-                const printContent = `
-            <html>
-                <head>
-                    <meta charset="utf-8"/>
-                    <title>Detail Barang - ${printData.nama_barang}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; color: #222 }
-                        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-                        .header h1 { color: #333; margin: 0; font-size: 20px; }
-                        .section { margin-bottom: 16px; }
-                        .section h2 { color: #2c5282; border-bottom: 1px solid #ddd; padding-bottom: 6px; font-size: 16px; }
-                        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-                        .info-label { color: #666; font-size: 12px; }
-                        .info-value { font-weight: bold; color: #111; font-size: 13px; }
-                        .small { font-size: 12px; color:#666 }
-                        @media print { .no-print { display: none; } }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>Detail Barang</h1>
-                        <p class="small">Kode Aset: ${printData.kodeAset}</p>
-                        <p class="small">NIBAR: ${printData.nibar}</p>
-                        <p class="small">Tanggal Cetak: ${now.toLocaleDateString('id-ID')}</p>
-                    </div>
-
-                    <div class="section">
-                        <h2>Informasi Barang</h2>
-                        <div class="info-grid">
-                            <div>
-                                <div class="info-label">Nama Barang</div>
-                                <div class="info-value">${printData.nama_barang}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">REG</div>
-                                <div class="info-value">${printData.reg}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Jumlah</div>
-                                <div class="info-value">${printData.jumlah} ${printData.satuan}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Merk / Tipe</div>
-                                <div class="info-value">${printData.merk_tipe}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Lokasi</div>
-                                <div class="info-value">${printData.lokasi}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Nomor Polisi</div>
-                                <div class="info-value">${printData.nopol}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Nomor Rangka / BPKB</div>
-                                <div class="info-value">${printData.nomor_rangka_bpkb}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <h2>Perolehan & Nilai</h2>
-                        <div class="info-grid">
-                            <div>
-                                <div class="info-label">Tanggal Perolehan</div>
-                                <div class="info-value">${printData.tanggal_perolehan}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Cara Perolehan</div>
-                                <div class="info-value">${printData.cara_perolehan}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Harga Satuan</div>
-                                <div class="info-value">${printData.harga_satuan}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Nilai Perolehan (Total)</div>
-                                <div class="info-value">${printData.nilai_perolehan}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <h2>Status & Catatan</h2>
-                        <div class="info-grid">
-                            <div>
-                                <div class="info-label">Kondisi</div>
-                                <div class="info-value">${printData.kondisi}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Keberadaan</div>
-                                <div class="info-value">${printData.keberadaan}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Pemegang</div>
-                                <div class="info-value">${printData.pemegang}</div>
-                            </div>
-                            <div>
-                                <div class="info-label">Status Penggunaan</div>
-                                <div class="info-value">${printData.status_penggunaan}</div>
-                            </div>
-                        </div>
-
-                        <div style="margin-top:12px;">
-                            <div class="info-label">Keterangan</div>
-                            <div class="info-value">${printData.keterangan}</div>
-                        </div>
-                    </div>
-
-                    <div class="section no-print small" style="text-align:center; margin-top:18px;">
-                        Dokumen ini dicetak dari Sistem Inventaris Barang
-                    </div>
-                </body>
-            </html>
-        `;
-
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(printContent);
-                printWindow.document.close();
-                printWindow.focus();
-
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                }, 300);
-            }
-        </script>
-    @endpush
 @endsection

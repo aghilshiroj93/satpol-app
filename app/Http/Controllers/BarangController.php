@@ -201,4 +201,72 @@ class BarangController extends Controller
         $barang = MasterBarang::findOrFail($id);
         return view('barang.show', compact('barang'));
     }
+    public function cetak($id)
+    {
+        $barang = MasterBarang::findOrFail($id);
+
+        // Format data untuk cetak
+        $kodeAset = $barang->kode_barang ??
+            $barang->kd_aset1 . '.' .
+            $barang->kd_aset2 . '.' .
+            $barang->kd_aset3 . '.' .
+            $barang->kd_aset4 . '.' .
+            $barang->kd_aset5;
+
+        $merkTipe = trim(($barang->merk ?? '') . ' ' . ($barang->tipe ?? ''));
+        $merkTipe = $merkTipe ?: '-';
+
+        $tanggalPerolehan = $barang->tanggal_perolehan
+            ? Carbon::parse($barang->tanggal_perolehan)->format('d/m/Y')
+            : ($barang->tahun_perolehan
+                ? Carbon::parse($barang->tahun_perolehan)->format('d/m/Y')
+                : '-');
+
+        $nilaiPerolehan = $barang->nilai_perolehan ??
+            ($barang->harga_satuan ?? 0) * ($barang->jumlah ?? 1);
+
+        return view('barang.cetak', compact(
+            'barang',
+            'kodeAset',
+            'merkTipe',
+            'tanggalPerolehan',
+            'nilaiPerolehan'
+        ));
+    }
+
+    /**
+     * Print langsung berita acara (tanpa preview)
+     */
+    public function print($id)
+    {
+        $barang = MasterBarang::findOrFail($id);
+
+        // Format data untuk cetak
+        $kodeAset = $barang->kode_barang ??
+            $barang->kd_aset1 . '.' .
+            $barang->kd_aset2 . '.' .
+            $barang->kd_aset3 . '.' .
+            $barang->kd_aset4 . '.' .
+            $barang->kd_aset5;
+
+        $merkTipe = trim(($barang->merk ?? '') . ' ' . ($barang->tipe ?? ''));
+        $merkTipe = $merkTipe ?: '-';
+
+        $tanggalPerolehan = $barang->tanggal_perolehan
+            ? Carbon::parse($barang->tanggal_perolehan)->format('d/m/Y')
+            : ($barang->tahun_perolehan
+                ? Carbon::parse($barang->tahun_perolehan)->format('d/m/Y')
+                : '-');
+
+        $nilaiPerolehan = $barang->nilai_perolehan ??
+            ($barang->harga_satuan ?? 0) * ($barang->jumlah ?? 1);
+
+        return view('barang.cetak', compact(
+            'barang',
+            'kodeAset',
+            'merkTipe',
+            'tanggalPerolehan',
+            'nilaiPerolehan'
+        ))->with('autoPrint', true);
+    }
 }

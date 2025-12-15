@@ -38,10 +38,20 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard.perawatan-data');
 
     // Resource routes
-    Route::resource('barang', BarangController::class);
-    // Jika kamu butuh route detail khusus
-    Route::get('/barang/{barang}/detail', [BarangController::class, 'detail'])
-        ->name('barang.detail');
+    // Barang routes
+    Route::prefix('barang')->name('barang.')->group(function () {
+        Route::get('/', [BarangController::class, 'index'])->name('index');
+        Route::get('/create', [BarangController::class, 'create'])->name('create');
+        Route::post('/', [BarangController::class, 'store'])->name('store');
+        Route::get('/{id}', [BarangController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [BarangController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [BarangController::class, 'update'])->name('update');
+        Route::delete('/{id}', [BarangController::class, 'destroy'])->name('destroy');
+
+        // Tambahkan ini untuk route cetak
+        Route::get('/{id}/cetak', [BarangController::class, 'cetak'])->name('cetak');
+        Route::get('/{id}/print', [BarangController::class, 'print'])->name('print');
+    });
 
     Route::resource('perawatan', PerawatanController::class);
     Route::resource('petugas', PetugasController::class);
